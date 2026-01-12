@@ -1,2 +1,1 @@
-# ems-algashop-product-catalog
-Algashop Product Catalog
+# ems-algashop-product-catalog-inicial
