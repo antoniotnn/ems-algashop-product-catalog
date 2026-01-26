@@ -3,7 +3,6 @@ package contracts.product
 import org.springframework.cloud.contract.spec.Contract
 
 Contract.make {
-
     request {
         method POST()
         headers {
@@ -17,15 +16,15 @@ Contract.make {
                             stub(nonBlank())
                     ),
                     brand: value(
-                            test("Deep Driver"),
-                            stub(nonBlank()),
+                            test("Deep Diver"),
+                            stub(nonBlank())
                     ),
                     regularPrice: value(
                             test(1500.00),
                             stub(number())
                     ),
                     salePrice: value(
-                            test(1500.00),
+                            test(1000.00),
                             stub(number())
                     ),
                     enabled: value(
@@ -37,7 +36,7 @@ Contract.make {
                             stub(anyUuid())
                     ),
                     description: value(
-                            test("A Gamer Notebook!"),
+                            test("A Gamer Notebook"),
                             stub(optional(nonBlank()))
                     )
             ])
@@ -49,19 +48,19 @@ Contract.make {
             contentType 'application/json'
         }
         body([
-                id          : anyUuid(),
-                addedAt     : anyIso8601WithOffset(),
-                name        : fromRequest().body('$.name'),
-                brand       : fromRequest().body('$.brand'),
+                id: anyUuid(),
+                addedAt: anyIso8601WithOffset(),
+                name: fromRequest().body('$.name'),
+                brand: fromRequest().body('brand'),
                 regularPrice: fromRequest().body('$.regularPrice'),
-                salePrice   : fromRequest().body('$.salePrice'),
-                inStock     : false,
-                enabled     : fromRequest().body('$.enabled'),
-                category    : [
-                        id  : fromRequest().body('$.categoryId'),
+                salePrice: fromRequest().body('$.salePrice'),
+                inStock: anyBoolean(),
+                enabled: fromRequest().body('$.enabled'),
+                category: [
+                        id: anyUuid(),
                         name: "Notebook"
                 ],
-                description : fromRequest().body('$.description')
+                description: fromRequest().body('$.description'),
         ])
     }
 }

@@ -8,8 +8,7 @@ Contract.make {
         headers {
             accept 'application/json'
         }
-        url("/api/v1/products/fffe6ec2-7103-48b3-8e4f-3b58e43fb75a") {
-        }
+        url("/api/v1/products/fffe6ec2-7103-48b3-8e4f-3b58e43fb75a")
     }
     response {
         status 200
@@ -20,7 +19,7 @@ Contract.make {
                 id: fromRequest().path(3),
                 addedAt: anyIso8601WithOffset(),
                 name: "Notebook X11",
-                brand: "Deep Driver",
+                brand: "Deep Diver",
                 regularPrice: 1500.00,
                 salePrice: 1000.00,
                 inStock: true,
@@ -29,7 +28,7 @@ Contract.make {
                         id: anyUuid(),
                         name: "Notebook"
                 ],
-                description: "A gamer Notebook",
+                description: "A Gamer Notebook"
         ])
     }
 }
