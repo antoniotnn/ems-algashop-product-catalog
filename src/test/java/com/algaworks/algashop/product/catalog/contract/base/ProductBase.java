@@ -39,6 +39,12 @@ public class ProductBase {
 
     public static final UUID createdProductId = UUID.fromString("f7c6843f-465c-476d-9a9b-4783bde4dc5e");
 
+    private static final UUID updatedProductId = UUID.fromString("a3927f81-5d33-4b0e-b2e4-3c1a7bba8d5f");
+
+    private static final UUID updatedNotFoundProductId = UUID.fromString("c7e42a19-8b54-4c92-9d2a-1f8ef83a37e6");
+
+    private static final UUID deletedNotFoundProductId = UUID.fromString("7a6f3c9b-2d8e-4f1a-b5e2-9c3d7f8a1b2e");
+
     @BeforeEach
     void setUp() {
         RestAssuredMockMvc.mockMvc(MockMvcBuilders.webAppContextSetup(context)
@@ -50,7 +56,36 @@ public class ProductBase {
         mockFilterProducts();
         mockCreateProduct();
         mockInvalidProductFindById();
+        mockUpdateProduct();
+        mockUpdateNotFoundProduct();
+        mockDeletedProduct();
+        mockDeletedNotFoundProduct();
     }
+
+    private void mockDeletedNotFoundProduct(){
+        Mockito.doThrow(new ResourceNotFoundException())
+                .when(productManagementApplicationService)
+                .disable(Mockito.eq(deletedNotFoundProductId));
+    }
+
+    private void mockDeletedProduct() {
+        Mockito.doNothing().when(productManagementApplicationService)
+                .disable(Mockito.any(UUID.class));
+    }
+
+    private void mockUpdateNotFoundProduct(){
+        Mockito.doThrow(new ResourceNotFoundException())
+                .when(productManagementApplicationService)
+                .update(Mockito.eq(updatedNotFoundProductId), Mockito.any(ProductInput.class));
+    }
+
+    private void mockUpdateProduct() {
+        Mockito.doNothing().when(productManagementApplicationService).update(
+                Mockito.any(UUID.class), Mockito.any(ProductInput.class));
+        Mockito.when(productQueryService.findById(updatedProductId))
+                .thenReturn(ProductDetailOutputTestDataBuilder.aProduct().build());
+    }
+
 
     private void mockInvalidProductFindById() {
         Mockito.when(productQueryService.findById(invalidProductId))
