@@ -1,3 +1,4 @@
+
 plugins {
 	id 'java'
 	id 'maven-publish'
@@ -57,6 +58,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testImplementation 'org.springframework.cloud:spring-cloud-starter-contract-verifier'
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+	testImplementation 'io.rest-assured:spring-mock-mvc:6.0.0'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
