@@ -42,6 +42,7 @@ configurations {
 		extendsFrom annotationProcessor
 	}
 	asciidoctorExt
+	mockitoAgent {transitive = false}
 }
 
 dependencies {
@@ -53,6 +54,8 @@ dependencies {
 	implementation 'org.apache.commons:commons-lang3:3.20.0'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
@@ -60,6 +63,7 @@ dependencies {
 	testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 	testImplementation 'io.rest-assured:spring-mock-mvc:6.0.0'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	mockitoAgent 'org.mockito:mockito-core:5.20.0'
 }
 
 dependencyManagement {
@@ -72,6 +76,10 @@ contracts {
 	packageWithBaseClasses = "com.algaworks.algashop.product.catalog.contract.base"
 }
 
+tasks.named('check') {
+	dependsOn(test, contractTest, integrationTest)
+}
+
 tasks.named('contractTest') {
 	outputs.dir snippetsDir
 	useJUnitPlatform()
@@ -79,6 +87,35 @@ tasks.named('contractTest') {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+test {
+	filter {
+		excludeTestsMatching("*IT")
+	}
+	jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
+}
+
+tasks.register('integrationTest', Test) {
+	description = 'Run integration tests.'
+	group = 'verification'
+	jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
+
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+
+	shouldRunAfter test
+
+	useJUnitPlatform()
+
+	testLogging {
+		events "passed"
+	}
+
+	filter {
+		includeTestsMatching "*IT"
+		excludeTestsMatching "*Test"
+	}
 }
 
 asciidoctor {
