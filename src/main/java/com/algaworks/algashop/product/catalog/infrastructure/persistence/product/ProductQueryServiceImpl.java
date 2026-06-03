@@ -1,6 +1,6 @@
 package com.algaworks.algashop.product.catalog.infrastructure.persistence.product;
 
-import com.algaworks.algashop.product.catalog.application.product.query.PageModel;
+import com.algaworks.algashop.product.catalog.application.PageModel;
 import com.algaworks.algashop.product.catalog.application.product.query.ProductDetailOutput;
 import com.algaworks.algashop.product.catalog.application.product.query.ProductQueryService;
 import com.algaworks.algashop.product.catalog.application.product.query.ProductSummaryOutput;
