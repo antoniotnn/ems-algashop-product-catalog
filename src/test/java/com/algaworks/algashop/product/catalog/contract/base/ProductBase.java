@@ -117,7 +117,7 @@ public class ProductBase {
 
     private void mockFilterProducts() {
         Mockito.when(productQueryService.filter(
-                        Mockito.anyInt(), Mockito.anyInt()))
+                        Mockito.any()))
                 .then((answer)-> {
                     Integer size = answer.getArgument(0);
 
