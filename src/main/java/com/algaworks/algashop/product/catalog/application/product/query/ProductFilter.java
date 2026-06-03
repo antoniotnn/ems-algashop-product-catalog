@@ -25,7 +25,7 @@ public class ProductFilter extends SortablePageFilter<ProductFilter.SortType> {
     private BigDecimal priceFrom;
     private BigDecimal priceTo;
 
-    private UUID[] cagetoryIds;
+    private UUID[] categoriesId;
 
     private OffsetDateTime addedAtFrom;
     private OffsetDateTime addedAtTo;
