@@ -3,10 +3,7 @@ package com.algaworks.algashop.product.catalog.domain.model.product;
 import com.algaworks.algashop.product.catalog.domain.model.DomainException;
 import com.algaworks.algashop.product.catalog.domain.model.IdGenerator;
 import com.algaworks.algashop.product.catalog.domain.model.category.Category;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.*;
 import org.springframework.data.domain.AbstractAggregateRoot;
@@ -24,14 +21,15 @@ import java.util.UUID;
 
 @Document(collection = "products")
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-@NoArgsConstructor
 @CompoundIndex(name = "pidx_product_by_category_enabledTrue_salePrice",
         def = "{'category.id': 1, 'salePrice': 1}",
         partialFilter = "{'enabled': true}")
 @CompoundIndex(name = "pidx_product_by_category_enabledTrue_addedAt",
         def = "{'category.id': 1, 'addedAt': -1}",
-        partialFilter = "{'enabled': true}")
+        partialFilter = "{'enabled': true}"
+)
 public class Product extends AbstractAggregateRoot<Product> {
 
     @Id
@@ -78,7 +76,7 @@ public class Product extends AbstractAggregateRoot<Product> {
     private Float score;
 
     @Builder
-    public Product(String brand, String name, String description,
+    public Product(String name, String brand, String description,
                    Boolean enabled, BigDecimal regularPrice, BigDecimal salePrice, Category category) {
         this.setId(IdGenerator.generateTimeBasedUUID());
         this.setName(name);
@@ -88,6 +86,8 @@ public class Product extends AbstractAggregateRoot<Product> {
         this.setRegularPrice(regularPrice);
         this.setSalePrice(salePrice);
         this.setCategory(category);
+
+        super.registerEvent(ProductAddedEvent.builder().productId(this.id).build());
     }
 
     public void setName(String name) {
@@ -110,7 +110,17 @@ public class Product extends AbstractAggregateRoot<Product> {
 
     public void setEnabled(Boolean enabled) {
         Objects.requireNonNull(enabled);
+        Boolean wasEnabled = this.enabled;
         this.enabled = enabled;
+        if (wasEnabled != null && wasEnabled && !this.getEnabled()) {
+            this.registerEvent(ProductDelistedEvent.builder()
+                    .productId(this.getId())
+                    .build());
+        } else if (wasEnabled != null && !wasEnabled && this.getEnabled()) {
+            this.registerEvent(ProductListedEvent.builder()
+                    .productId(this.getId())
+                    .build());
+        }
     }
 
     public void setCategory(Category category) {
@@ -131,33 +141,7 @@ public class Product extends AbstractAggregateRoot<Product> {
     }
 
     public boolean getHasDiscount() {
-        return this.getDiscountPercentageRounded() != null && this.getDiscountPercentageRounded() > 0;
-    }
-
-    private void setId(UUID id) {
-        Objects.requireNonNull(id);
-        this.id = id;
-    }
-
-    private void setQuantityInStock(Integer quantityInStock) {
-        Objects.requireNonNull(quantityInStock);
-        if (quantityInStock < 0) {
-            throw new IllegalArgumentException();
-        }
-        this.quantityInStock = quantityInStock;
-    }
-
-    private void calculateDiscountPercentage() {
-        if (regularPrice == null || salePrice == null || regularPrice.signum() == 0) {
-            discountPercentageRounded = 0;
-            return;
-        }
-
-        discountPercentageRounded = BigDecimal.ONE
-                .subtract(salePrice.divide(regularPrice, 4, RoundingMode.HALF_UP))
-                .multiply(BigDecimal.valueOf(100))
-                .setScale(0, RoundingMode.HALF_UP)
-                .intValue();
+        return getDiscountPercentageRounded() != null && getDiscountPercentageRounded() > 0;
     }
 
     public void changePrice(BigDecimal regularPrice, BigDecimal salePrice) {
@@ -185,6 +169,7 @@ public class Product extends AbstractAggregateRoot<Product> {
         if (isNewlyOnSale(wasOnSale)) {
             registerProductPlacedOnSaleEvent();
         }
+
     }
 
     private boolean pricesDidNotChange(BigDecimal oldRegularPrice, BigDecimal oldSalePrice) {
@@ -209,12 +194,11 @@ public class Product extends AbstractAggregateRoot<Product> {
     }
 
     private void registerProductPlacedOnSaleEvent() {
-        super.registerEvent(
-                ProductPlacedOnSaleEvent.builder()
-                        .productId(this.id)
-                        .regularPrice(this.regularPrice)
-                        .salePrice(this.salePrice)
-                        .build()
+        super.registerEvent(ProductPlacedOnSaleEvent.builder()
+                .productId(this.id)
+                .regularPrice(this.regularPrice)
+                .salePrice(this.salePrice)
+                .build()
         );
     }
 
@@ -223,6 +207,7 @@ public class Product extends AbstractAggregateRoot<Product> {
         if (regularPrice.signum() == -1) {
             throw new IllegalArgumentException();
         }
+
         this.regularPrice = regularPrice;
         this.calculateDiscountPercentage();
     }
@@ -237,4 +222,29 @@ public class Product extends AbstractAggregateRoot<Product> {
         this.calculateDiscountPercentage();
     }
 
+    private void setId(UUID id) {
+        Objects.requireNonNull(id);
+        this.id = id;
+    }
+
+    private void setQuantityInStock(Integer quantityInStock) {
+        Objects.requireNonNull(quantityInStock);
+        if (quantityInStock < 0) {
+            throw new IllegalArgumentException();
+        }
+        this.quantityInStock =quantityInStock;
+    }
+
+    private void calculateDiscountPercentage() {
+        if (regularPrice == null || salePrice == null || regularPrice.signum() == 0) {
+            discountPercentageRounded = 0;
+            return;
+        }
+
+        discountPercentageRounded = BigDecimal.ONE
+                .subtract(salePrice.divide(regularPrice, 4, RoundingMode.HALF_UP))
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(0, RoundingMode.HALF_UP)
+                .intValue();
+    }
 }
