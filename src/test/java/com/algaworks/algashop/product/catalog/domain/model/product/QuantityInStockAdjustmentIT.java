@@ -33,7 +33,7 @@ class QuantityInStockAdjustmentIT {
     @Autowired
     private DataLoader dataLoader;
 
-    private static UUID existingProduct = UUID.fromString("946cea3b-d11d-4f11-b88d-3089b4e74087");
+    private static final UUID existingProduct = UUID.fromString("946cea3b-d11d-4f11-b88d-3089b4e74087");
 
     @BeforeEach
     public void beforeEach() throws Exception {
@@ -72,6 +72,15 @@ class QuantityInStockAdjustmentIT {
                 .isThrownBy(() -> quantityInStockAdjustment.decrease(existingProduct, 100));
         Product product = productRepository.findById(existingProduct).orElseThrow();
         Assertions.assertThat(product.getQuantityInStock()).isEqualTo(50);
+    }
+
+    @Test
+    void shouldCalculateResult() {
+        Product product = productRepository.findById(existingProduct).orElseThrow();
+        var result = quantityInStockAdjustment.decrease(product.getId(), 40);
+
+        Assertions.assertThat(result.newQuantity()).isEqualTo(10);
+        Assertions.assertThat(result.previousQuantity()).isEqualTo(50);
     }
 
 }
