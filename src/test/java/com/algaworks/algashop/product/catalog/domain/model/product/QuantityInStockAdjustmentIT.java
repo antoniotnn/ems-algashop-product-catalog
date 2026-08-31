@@ -1,5 +1,6 @@
 package com.algaworks.algashop.product.catalog.domain.model.product;
 
+import com.algaworks.algashop.product.catalog.TestcontainerMongoDBConfig;
 import com.algaworks.algashop.product.catalog.infrastructure.persistence.MongoConfig;
 import com.algaworks.algashop.product.catalog.infrastructure.persistence.dataload.DataLoadProperties;
 import com.algaworks.algashop.product.catalog.infrastructure.persistence.dataload.DataLoader;
@@ -20,8 +21,10 @@ import java.util.UUID;
         MongoConfig.class,
         QuantityInStockAdjustmentMongoDBImpl.class,
         DataLoader.class,
-        DataLoadProperties.class
+        DataLoadProperties.class,
+        TestcontainerMongoDBConfig.class
 })
+//@Transactional
 class QuantityInStockAdjustmentIT {
 
     @Autowired
